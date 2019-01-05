@@ -118,14 +118,19 @@ vm_dmp(void)
 		} 
 		
 		total_kB = vui.vui_total / 1024L;
-		if (vui.vui_shared / 1024L > 0) strcpy(shrd, "Y");
+
+		if (vui.vui_shared / 1024L > 0 || vui.vui_common / 1024L > 0)
+			strcpy(shrd, "Y");
 		else strcpy(shrd, "N");
-		printf("----------------------  -> Proc: %d(%s): Total %d kB, shared: %s", 
+
+		printf("----------------------  -> Proc: %d(%s): Total %lu kB, shared: %s", 
 			proc[i].p_endpoint, proc[i].p_name, vui.vui_total / 1024L, shrd);
+
 		while (total_kB <= 0) {
 			printf("|//////////////////////|");
 			total_kB = total_kB / 4096L;
 		}
+
 		printf("----------------------");
 
 
