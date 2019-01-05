@@ -123,15 +123,15 @@ vm_dmp(void)
 			strcpy(shrd, "Y");
 		else strcpy(shrd, "N");
 
-		printf("----------------------  -> Proc: %d(%s): Total %lu kB, shared: %s", 
+		printf("------------  -> Proc: %d(%s): Total %lu kB, shared: %s", 
 			proc[i].p_endpoint, proc[i].p_name, vui.vui_total / 1024L, shrd);
 
 		while (total_kB <= 0) {
-			printf("|//////////////////////|");
+			printf("|//////////|");
 			total_kB = total_kB / 4096L;
 		}
 
-		printf("----------------------");
+		printf("------------");
 
 
 		/*
