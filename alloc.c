@@ -372,8 +372,9 @@ void memstats(int *nodes, int *pages, int *largest)
 
 static int findbit(int low, int startscan, int pages, int memflags, int *len)
 {
-	int run_length = 0, i;
+	int run_length = 0, i; 
 	int freerange_start = startscan;
+	int bestpages = INT_MAX, bestaddress;
 
 	for(i = startscan; i >= low; i--) {
 		if(!page_isfree(i)) {
@@ -389,13 +390,24 @@ static int findbit(int low, int startscan, int pages, int memflags, int *len)
 			if(moved) { i = chunk * BITCHUNK_BITS + BITCHUNK_BITS; }
 			continue;
 		}
+
+		if ((!page_isfree(i)) && (page_isfree(i-1)) && (run_lenght >= pages) && (run_length < bestpages)) {
+			bestpages = run_lenght;
+			bestaddress = freerange_start;
+		}
+		//The conditional ask if it finished to check a block of hole. Also asks if,
+		//the range of the block is greater or equal than the total number of pages
+		//that we want to add to the memory. The last condition is used to know if 
+		//the block is less than the best number of pages known so far. If this is
+		//then we set the best number of pages and the beggining of the the address
+		//of that block.
 		if(!run_length) { freerange_start = i; run_length = 1; }
 		else { freerange_start--; run_length++; }
 		assert(run_length <= pages);
-		if(run_length == pages) {
+		if(bestpage >= pages) {
 			/* good block found! */
 			*len = run_length;
-			return freerange_start;
+			return bestaddress;
 		}
 	}
 
