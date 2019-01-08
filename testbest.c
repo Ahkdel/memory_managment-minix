@@ -121,6 +121,7 @@ int main( int argc, char **argv)
 
 		else if (id > 0) {
 			list = add_pid(list, id);
+			//printf("Added %d: ", id);
 		} 
 		else break;	
 	}
