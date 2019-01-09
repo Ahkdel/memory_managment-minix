@@ -404,7 +404,7 @@ static int findbit(int low, int startscan, int pages, int memflags, int *len)
 		if(!run_length) { freerange_start = i; run_length = 1; }
 		else { freerange_start--; run_length++; }
 		assert(run_length <= pages);
-		if(bestpage >= pages) {
+		if(bestpages >= pages) {
 			/* good block found! */
 			*len = run_length;
 			return bestaddress;
