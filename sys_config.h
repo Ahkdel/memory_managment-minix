@@ -1,3 +1,4 @@
+//usr/src/include/minix/sys_config.h
 #ifndef _MINIX_SYS_CONFIG_H
 #define _MINIX_SYS_CONFIG_H 1
 
