@@ -7,55 +7,67 @@
 #include <time.h>
 
 #define INT_MAX 32767
-#define NR_PROCS 100
+#define NR_PROCS 20
 
 int randomizer (int *pids, int *index) {
 
-	time_t seed_randomizer;
-	seed_randomizer = time(NULL);
-	seed_randomizer = seed_randomizer % 32767;
+	time_t time_randomizer;
+	time_randomizer = time(NULL);
+	int seed_randomizer = time_randomizer % INT_MAX;
 	srand (seed_randomizer);
 
-	int random_id = rand() % NR_PROCS;
+	int rand_ = rand();
+	int random_id = rand_ % NR_PROCS;
 
 	while (pids[random_id] == 0) {
 		random_id++;
-		if (random_id == NR_PROCS + 1)
+		if (random_id == NR_PROCS)
 			random_id = 0;
 	}
 	*index = random_id;
 	return pids[random_id];
 }
 
-int main( int argc, char **argv)
+int main(int argc, char **argv)
 {
 	int pids[NR_PROCS];
 	int i = 0;
-	pid_t id = 1;
+	pid_t id = 0;
 
-	while (id >= 0) {
+	while ((id >= 0) && (i < NR_PROCS)) {
 		id = fork();
 
-		if (id == 0) 
-			while(1);
-				//printf("Soy el hijo\n");
-
+		if (id == 0) {
+			//for (int j = 0; j != NR_PROCS; j++)
+			//	pids[j] = 0;
+			//printf("Soy el hijo\n");
+			while (1)
+				;
+		}
 		else if (id > 0) {
-			printf("Soy el padre\n");
+			if (i == 0)
+				printf("I'm the father. ");
+			else
+				printf("I'm still the father. ");
 			pids[i] = id;
 			i++;
-			printf("Added :%d ", id);
+			printf("Added: %d \n", id);
 		} 
 	}
 	if (id != 0) {
-		printf("Cada 10 segundos se eliminara un proceso\n");
+		//printf("Cada 10 segundos se eliminara un proceso\n");
 		int index;
 		while (i > 0) {
-			pid_t id = randomizer (pids, &index);
-			if (kill(id, SIGKILL) > 0)
+			id = randomizer (pids, &index);
+			sleep(1);
+			if (kill(id, SIGKILL) >= 0) {
+				printf("Deleted process %d\n", id);
 				pids[index] = 0;
-			else
-				fprintf(stderr, "Child didn't die");
+			}
+			else {
+				fprintf(stderr, "Child didn't die (id: %d)", id);
+				exit(1);
+			}
 			i--;
 		} 
 	}
