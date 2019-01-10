@@ -2,141 +2,62 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
 
 #define INT_MAX 32767
+#define NR_PROCS 100
 
-struct ids_nodes {
-	pid_t id_child;
-	struct ids_nodes *next;
-};
-
-typedef struct ids_nodes ids;
-
-ids* newNode (pid_t new_id) {
-	ids *p_ids;
-
-	p_ids = (ids*) malloc(sizeof(ids));
-	p_ids->id_child = new_id;
-	p_ids->next = NULL;
-
-	return p_ids;
-}
-
-ids* add_pid (ids *list, pid_t new_id) {
-	ids *node = newNode(new_id);
-
-	if (!node) {
-		fprintf(stderr, "Error newNode: node = NULL\n");
-		exit(1);
-	}
-	if (!list)
-		return node;
-	else {
-		node->next = list;
-		return node;
-	}
-}
-
-void printList (ids *list) {
-	while (list) {
-		printf ("%d\t", list->id_child);
-		list = list->next;
-	}
-	printf("\n");
-}
-
-pid_t higgest (ids *list) {
-	pid_t high = INT_MAX;
-	while (list) {
-		pid_t possible = list->id_child;
-
-		if (possible < high)
-			high = possible;
-		list = list->next;
-	}
-}
-
-int check_id (ids *list, pid_t checker) {
-	while ((list) && (checker != list->id_child))
-		list = list->next;
-	if (list) return 1;
-	return 0;
-}
-
-pid_t randomizer (ids *list) {
+int randomizer (int *pids, int *index) {
 
 	time_t seed_randomizer;
 	seed_randomizer = time(NULL);
 	seed_randomizer = seed_randomizer % 32767;
 	srand (seed_randomizer);
 
-	pid_t random_id = rand() % higgest(list);
+	int random_id = rand() % NR_PROCS;
 
-	while (check_id(list, random_id) == 0)
+	while (pids[random_id] == 0) {
 		random_id++;
-
-	return random_id;
-}
-
-ids* delete_node (ids *list, pid_t id) {
-
-	ids *aux = list;
-
-	while ((aux) && (aux->next)) {
-
-		if ((aux == list) && (aux->id_child == id)) {
-			list = list->next;
-			free(aux);
-			return list;
-		}
-
-		else if ((aux != list) && (aux->next->id_child == id)) {
-			aux->next = aux->next->next;
-			free(aux->next);
-			return list;
-		}
-
-		aux = aux->next;
+		if (random_id == NR_PROCS + 1)
+			random_id = 0;
 	}
+	*index = random_id;
+	return pids[random_id];
 }
 
 int main( int argc, char **argv)
 {
-	ids *list = NULL;
-	pid_t id;
-	id = 0;	
-	int contador = 0;
+	int pids[NR_PROCS];
+	int i = 0;
+	pid_t id = 1;
 
-	while(id >= 0) {
+	while (id >= 0) {
 		id = fork();
 
-		if (id == 0) {
-			contador++; 
-			while(1) { }
-		}
+		if (id == 0) 
+			while(1);
+				//printf("Soy el hijo\n");
 
 		else if (id > 0) {
-			list = add_pid(list, id);
-			//printf("Added %d: ", id);
+			printf("Soy el padre\n");
+			pids[i] = id;
+			i++;
+			printf("Added :%d ", id);
 		} 
-		else break;	
 	}
-	printf("\tCantidad de Procesos Activos : %i \n\n",contador);
-	printf("\tLista de procesos activos: \n");
-	printList(list);
-	printf("Cada 10 segundos se eliminara un proceso\n");
-	while (list) {
-		sleep(10);
-		pid_t id = randomizer (list);
-		if (kill(id, SIGKILL) > 0)
-			list = delete_node(list, id);
-		else
-			fprintf(stderr, "Child didn't die");
+	if (id != 0) {
+		printf("Cada 10 segundos se eliminara un proceso\n");
+		int index;
+		while (i > 0) {
+			pid_t id = randomizer (pids, &index);
+			if (kill(id, SIGKILL) > 0)
+				pids[index] = 0;
+			else
+				fprintf(stderr, "Child didn't die");
+			i--;
+		} 
 	}
-
 	return 0;
 }
