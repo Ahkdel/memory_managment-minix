@@ -38,9 +38,6 @@ int main(int argc, char **argv)
 		id = fork();
 
 		if (id == 0) {
-			//for (int j = 0; j != NR_PROCS; j++)
-			//	pids[j] = 0;
-			//printf("Soy el hijo\n");
 			while (1)
 				;
 		}
@@ -55,13 +52,14 @@ int main(int argc, char **argv)
 		} 
 	}
 	if (id != 0) {
-		//printf("Cada 10 segundos se eliminara un proceso\n");
+		printf("----Every second, a process will die----\nDeleted process': \n");
 		int index;
 		while (i > 0) {
 			id = randomizer (pids, &index);
-			sleep(1);
+			
 			if (kill(id, SIGKILL) >= 0) {
-				printf("Deleted process %d\n", id);
+				sleep(1);
+				printf("%d, ", id);
 				pids[index] = 0;
 			}
 			else {
@@ -71,5 +69,6 @@ int main(int argc, char **argv)
 			i--;
 		} 
 	}
+	printf("\n");
 	return 0;
 }
