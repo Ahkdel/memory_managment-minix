@@ -6,7 +6,7 @@
  *		This section contains user-settable parameters		     *
  *===========================================================================*/
 
-#define _NR_PROCS	100
+#define _NR_PROCS	20
 #define _NR_SYS_PROCS	64
 
 /* Set the FP_FORMAT type based on the machine selected, either hw or sw    */
